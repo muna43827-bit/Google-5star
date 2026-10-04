@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ReviewQR</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 15%,#553b18,transparent 30%),radial-gradient(circle at 85% 85%,#292052,transparent 30%),#050505;color:#fff;font-family:Arial,sans-serif}
+.wrap{width:min(1000px,92%);margin:auto;padding:32px 0}.head{text-align:center;margin-bottom:25px}.logo{font-size:30px;font-weight:900}.logo b{color:#ffc45d}.tag{color:#999;margin-top:7px;font-size:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.card{background:#ffffff0d;border:1px solid #ffffff1c;border-radius:22px;padding:23px;backdrop-filter:blur(18px)}h2{font-size:19px;margin:0 0 18px}
+label{display:block;color:#aaa;font-size:13px;margin:0 0 7px}.field{margin-bottom:15px}
+input,textarea{width:100%;padding:13px;border-radius:11px;border:1px solid #ffffff1c;background:#0008;color:#fff;outline:0;font-size:14px}textarea{min-height:75px;resize:vertical}input:focus,textarea:focus{border-color:#ffc45d}
+button,.open{width:100%;padding:14px;border:0;border-radius:12px;font-weight:800;cursor:pointer}.main{background:linear-gradient(135deg,#ffd66b,#f39b22);color:#111}.secondary{margin-top:9px;background:#ffffff12;color:#fff}
+.preview{text-align:center}.ticket{max-width:360px;margin:auto;background:#fff;color:#111;border-radius:23px;padding:24px 20px}.icon{width:58px;height:58px;margin:auto;border-radius:17px;display:grid;place-items:center;font-size:27px;background:linear-gradient(135deg,#ffd66b,#f39b22)}
+.name{font-size:21px;font-weight:900;margin-top:12px;word-break:break-word}.stars{color:#f5a623;font-size:23px;margin:8px}.addr{color:#777;font-size:12px;line-height:1.5}
+#qrcode{width:220px;height:220px;margin:15px auto;display:grid;place-items:center;background:#fff;border-radius:12px}#qrcode img,#qrcode canvas{max-width:200px!important;max-height:200px!important}
+.note{color:#888;font-size:11px;line-height:1.5;margin-top:12px}.status{display:none;color:#7dff98;font-size:12px;margin-top:12px}.foot{text-align:center;color:#666;font-size:11px;margin-top:25px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="head"><div class="logo">⭐ Review<b>QR</b></div><div class="tag">Google review QR generator • GitHub Pages ready</div></div>
+<div class="grid">
+<div class="card">
+<h2>🏪 Business Details</h2>
+<div class="field"><label>Shop / Restaurant Name</label><input id="name" placeholder="Royal Restaurant"></div>
+<div class="field"><label>Address</label><textarea id="address" placeholder="Shop address"></textarea></div>
+<div class="field"><label>Google Maps OR Google Review Link</label><input id="link" type="url" placeholder="Paste Google link here"></div>
+<button class="main" onclick="makeQR()">✨ Generate QR</button>
+<button class="secondary" onclick="resetAll()">Reset</button>
+<div id="status" class="status">✓ QR generated</div>
+</div>
+<div class="card preview">
+<h2>📱 QR Preview</h2>
+<div class="ticket">
+<div class="icon">🏪</div><div class="name" id="pname">Your Shop Name</div><div class="stars">★★★★★</div>
+<div class="addr" id="paddr">Your address will appear here</div>
+<div id="qrcode"><span style="color:#aaa;font-size:12px">QR CODE</span></div>
+<div style="font-size:12px;color:#777">📷 Scan to open Google</div>
+<a id="open" class="open main" href="#" target="_blank" rel="noopener" style="display:block;text-decoration:none;margin-top:14px">Open Google</a>
+<div class="note">For direct “Write a review” opening, use the business's official Google review link.</div>
+</div>
+<button class="secondary" onclick="downloadQR()">⬇️ Download QR</button>
+</div>
+</div>
+<div class="foot">ReviewQR • No backend required</div>
+</div>
+<script>
+function makeQR(){
+ const n=document.getElementById("name").value.trim(),a=document.getElementById("address").value.trim(),l=document.getElementById("link").value.trim();
+ if(!n)return alert("Shop name enter karo.");
+ if(!l)return alert("Google Maps ya Review link paste karo.");
+ let u;try{u=new URL(l)}catch(e){return alert("Valid Google link paste karo.")}
+ if(!/^https?:$/.test(u.protocol))return alert("Valid http/https link paste karo.");
+ document.getElementById("pname").textContent=n;document.getElementById("paddr").textContent=a||"Business address";document.getElementById("open").href=u.href;
+ const q=document.getElementById("qrcode");q.innerHTML="";
+ if(typeof QRCode==="undefined")return alert("QR library load nahi hui. Internet ON karke reload karo.");
+ new QRCode(q,{text:u.href,width:200,height:200,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.H});
+ document.getElementById("status").style.display="block";
+}
+function downloadQR(){
+ const q=document.getElementById("qrcode"),c=q.querySelector("canvas"),i=q.querySelector("img");
+ if(!c&&!i)return alert("Pehle Generate QR dabao.");
+ const a=document.createElement("a"),n=(document.getElementById("name").value.trim()||"review-qr").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase();
+ a.download=(n||"review-qr")+".png";
+ if(c){a.href=c.toDataURL("image/png");a.click();return}
+ const x=document.createElement("canvas");x.width=i.naturalWidth||200;x.height=i.naturalHeight||200;x.getContext("2d").drawImage(i,0,0);a.href=x.toDataURL("image/png");a.click();
+}
+function resetAll(){document.getElementById("name").value="";document.getElementById("address").value="";document.getElementById("link").value="";document.getElementById("pname").textContent="Your Shop Name";document.getElementById("paddr").textContent="Your address will appear here";document.getElementById("open").href="#";document.getElementById("qrcode").innerHTML='<span style="color:#aaa;font-size:12px">QR CODE</span>';document.getElementById("status").style.display="none";}
+</script>
+</body>
+</html>
